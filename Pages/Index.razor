@@ -12,24 +12,23 @@ Welcome to your new app.
 <InputText @bind-Value="imagePath"></InputText>
 <button onclick="@ObjectDetectionImage">Object Detection</button>
 
-@if(!string.IsNullOrEmpty(returnImage) )
-{
-    <img src="@returnImage" />
+@if(!string.IsNullOrEmpty(returnResult) )
+{<p>@returnResult</p>
 }
 
 @code {
     private string imagePath = string.Empty;
-    private string returnImage = string.Empty;
+    private string returnResult = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
-        imagePath = "https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png";
+        imagePath = "";
     }
 
     private async Task ObjectDetectionImage()
     {
         //Load sample data
-        var image = MLImage.CreateFromFile(@"C:\Users\alexandre.castro\Downloads\object-detection-assets\Stop-Signs\joshua-hoehne-WPrTKRw8KRQ-unsplash.jpg");
+        var image = MLImage.CreateFromFile(@$"{imagePath}");
         MLModel.ModelInput sampleData = new MLModel.ModelInput()
             {
                 Image = image,
@@ -37,12 +36,8 @@ Welcome to your new app.
 
         //Load model and predict output
         var result = MLModel.Predict(sampleData);
-        MemoryStream stream = new MemoryStream();
-        stream.Write(result.Image.GetBGRPixels, 0, result.Image.Pixels.Length);
-
-        //var resultimg = MLImage.CreateFromPixels(result.Image.Width, result.Image.Height, MLPixelFormat.Bgra32, result.Image.Pixels);
-        var imagesrc = Convert.ToBase64String(result.Image.Pixels);
-        returnImage = string.Format("data:image/jpg;base64,{0}", imagesrc);
+        imagePath = string.Empty;   
+        returnResult = $"Predicted label : {result.PredictedLabel.FirstOrDefault()} \n Score result {result.Score.FirstOrDefault()}";
 
     }
 
